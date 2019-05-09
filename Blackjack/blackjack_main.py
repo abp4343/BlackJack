@@ -29,13 +29,9 @@ def how_many():
 			continue
 	return number_of_players
 
-#get player names
-def player_name():
-	player_name = input("What is the player's name? ")
-	return player_name
 
 #puts all player's names and balances into a list
-def name_balance_assignment(number, name):
+def name_balance_assignment(number):
 
 	#declare list that will be returned
 	assigned_values = []
@@ -45,7 +41,8 @@ def name_balance_assignment(number, name):
 
 	#for each player, add their name and balance to list
 	for player in range(number_of_players):
-		assigned_values.append(name())
+		player_name = input("What is player " + str(player + 1) + "'s name?\t")
+		assigned_values.append(player_name)
 		assigned_values.append(1000)
 
 	#return desired list containing player instances
@@ -64,19 +61,44 @@ def player_dictionary (player_name_balance):
 
 		#assign each dict key with a player object as its value
 		player_dict['player' + temp_string] = \
-		blackjackClasses.player\
-		(player_name_balance[count*2 - 2], player_name_balance[count*2 - 1])
+				blackjackClasses.Player\
+				(player_name_balance[count*2 - 2], player_name_balance[count*2 - 1])
 
 	#increment count
 		count += 1
 
 	return player_dict
 
+#asks players for bets
+def let_us_bet (player_object_dictionary):
+	for player_number in player_object_dictionary:
+
+		#create var to ensure that player has bet an allowable amount
+		check_amt = player_object_dictionary[player_number].balance
+
+		#ensure allowable bet has been placed
+		while (check_amt == player_object_dictionary[player_number].balance):
+
+			#ask for bet
+			bet_amt = input(player_object_dictionary[player_number].name + ", make a bet:\t")
+
+			#try to convert string to int, else ask for bet_amt again
+			try: 
+				bet_amt = int(bet_amt)
+
+			except:
+				print("\nBet must be a whole number.")
+				continue
+
+			#pass bet amt to player method, bet()	
+			player_object_dictionary[player_number].bet(bet_amt)
 
 
 #begin main program
 welcome()
 
-player_instances = name_balance_assignment(how_many, player_name)
+player_instances = name_balance_assignment(how_many)
 
 player_dict = player_dictionary(player_instances)
+
+let_us_bet(player_dict)

@@ -21,13 +21,13 @@ anymore)
 
 """
 
-class player():
+class Player():
 
 	#Create the player attributes: name, balance
 	def __init__(self, name, balance):
 		self.name = name
 		self.balance = balance
-
+		self.hand = []
 	"""
 
 	Create the bet method.  The bet method allows the player to place a bet (less
@@ -37,13 +37,14 @@ class player():
 
 	"""
 	def bet(self, amount):
-		if type(amount) != int:
-			print("Invald Amount!")
+		if amount <= 0:
+			print("You must bet a number greater than 0.")
 		elif amount > self.balance:
 			print("Insufficient Funds!")
 		else:
 			self.balance -= amount
-			print("You have bet ${wager}. Your new account balance is {accbal}. Good luck!".format(wager = amount, accbal = self.balance))
+			print("\nYou have bet ${wager}. Your new account balance is {accbal}. Good luck!" \
+				.format(wager = amount, accbal = self.balance))
 
 
 """
@@ -52,7 +53,7 @@ The Card class includes the number and suit of each card.
 
 """
 
-class card():
+class Card():
 
 	def __init__(self, suit, number):
 		self.suit = suit
@@ -67,7 +68,7 @@ shuffle a deck of cards for the Blackjack game.
 
 """
 
-class deck (card):
+class Deck (Card):
 
 	#Declare list to store cards
 	def __init__(self):
@@ -77,7 +78,8 @@ class deck (card):
 	def build_deck (self):
 
 		#create list for numbers and suits in order to loop through to build deck
-		number_name = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King']
+		number_name = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', \
+		'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King']
 		suit_name = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
 
 		#loop through each number for each suit
@@ -93,7 +95,7 @@ class deck (card):
 		#loop many times to ensure proper shuffling
 		while (count < 10000):
 
-			#generate two random numbers between 0 and lenth of deck list (52) , not including 52
+			#generate two random numbers between 0 and length of deck list (52), not including 52
 			num1 = random.randint(0, 51)
 			num2 = random.randint(0,51)
 
@@ -116,7 +118,7 @@ player to know how many points he has in his hand.
 
 """
 
-class hand:
+class Hand:
 
 	"""
 	Associate the hand with the player's name.  Be sure that
