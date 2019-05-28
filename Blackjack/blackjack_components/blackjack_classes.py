@@ -28,6 +28,8 @@ class Player():
 		self.name = name
 		self.balance = balance
 		self.hand = []
+		self.score = 0
+		self.ace = False
 	"""
 
 	Create the bet method.  The bet method allows the player to place a bet (less
@@ -55,10 +57,11 @@ The Card class includes the number and suit of each card.
 
 class Card():
 
-	def __init__(self, suit, number):
+	def __init__(self, suit, number, value = 1):
 		self.suit = suit
 		self.number = number
 		self.name = self.number + " of " + self.suit
+		self.value = value
 
 """
 
@@ -72,7 +75,7 @@ class Deck (Card):
 
 	#Declare list to store cards
 	def __init__(self):
-		self.list = []
+		self.cards = []
 
 	#build deck making use of card class
 	def build_deck (self):
@@ -85,8 +88,17 @@ class Deck (Card):
 		#loop through each number for each suit
 		for number in range(13):
 			for suit in range(4):
-				self.list.append(card(suit_name[suit], number_name[number]))
+				if number == 0:
+					self.cards.append(Card(suit_name[suit], number_name[number]))
 
+				elif number > 0 and number < 10:
+					self.cards.append(Card(suit_name[suit], number_name[number], number + 1))
+
+				else:
+					self.cards.append(Card(suit_name[suit], number_name[number], 10))
+
+
+	#shuffle deck, taking advantage of builtin random class
 	def shuffle_deck(self):
 
 		#create counter variable
@@ -100,11 +112,11 @@ class Deck (Card):
 			num2 = random.randint(0,51)
 
 			#generate temp variable in order to swap two positions
-			temp = self.list[num1]
+			temp = self.cards[num1]
 
 			#swap list elements
-			self.list[num1] = self.list[num2]
-			self.list[num2] = temp
+			self.cards[num1] = self.cards[num2]
+			self.cards[num2] = temp
 
 			#increment count
 			count += 1
