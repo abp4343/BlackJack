@@ -137,7 +137,13 @@ def initial_deal(deck, player_obj_dict):
 		print("-------------------------------------------------------------------------------------")
 
 		#consider if player wishes to use ace as 11 points rather than 1 point
-		if(player_obj_dict[player].ace):
+		if(player_obj_dict[player].score == 11):
+			player_obj_dict[player].score += 10
+			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
+				.format(player = player_obj_dict[player].name, card1 = card1.name,\
+				card2 = card2.name, points = player_obj_dict[player].score))
+		
+		elif(player_obj_dict[player].ace):
 			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
 				.format(player = player_obj_dict[player].name, card1 = card1.name,\
 				card2 = card2.name, points = player_obj_dict[player].score))
@@ -221,7 +227,7 @@ def hit_or_stand(deck, player_obj_dict):
 					player_obj_dict[player].ace = True
 
 				#consider if player wishes to use ace as 11 points rather than 1 point
-				if(player_obj_dict[player].ace):
+				if(player_obj_dict[player].ace and player_obj_dict[player].score + 10 < 21):
 					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
 						.format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
 
@@ -229,6 +235,14 @@ def hit_or_stand(deck, player_obj_dict):
 						.format(points_a = player_obj_dict[player].score + 10))
 
 					continue
+
+				elif(player_obj_dict[player].ace and player_obj_dict[player].score + 10 == 21):
+
+					#assign an ace as 11
+					player_obj_dict.score += 10
+
+					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
+						.format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
 
 				else:
 					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
@@ -241,6 +255,10 @@ def hit_or_stand(deck, player_obj_dict):
 				is_hit = False
 			
 		print("-------------------------------------------------------------------------------------")	
+
+'''
+Allow dealer to draw until he exceeds 17 points
+'''
 
 def dealer_draws(deal_cards, deck):
 
@@ -380,7 +398,7 @@ def dealer_draws(deal_cards, deck):
 		print("-------------------------------------------------------------------------------------")
 
 		print("The dealer does not have at least 17 points (currently, {points_a} points to be exact)."\
-			.format(points_a = dealer_points + 10))
+			.format(points_a = dealer_points))
 		print("And so, the dealer will draw another card until he gets at least 17 points or he busts.\n")
 
 		print("-------------------------------------------------------------------------------------")
@@ -456,6 +474,67 @@ def dealer_draws(deal_cards, deck):
 			else:
 				continue
 
+'''
+calculate final player points
+'''
+
+def final_points (player_obj_dict):
+
+	#cycle through players
+	for player in player_obj_dict:
+
+		#check if player has ace
+		if(player_obj_dict[player].ace == True and player_obj_dict[player].score <= 11):
+			player_obj_dict[player].score += 10
+
+'''
+determine winners and losers of the game and payout to winners
+'''
+
+def win_or_loss(player_obj_dict, dealer_points, bet_amts):
+
+	#cycle through players
+	for player in player_obj_dict:
+
+		#convert digit in player key to an index beginning at 0
+		bet_number = int(player[-1]) - 1
+
+		#case 1: player busts, player loses
+		if(player_obj_dict[player].score > 21):
+			print("\n{player}, you have lost the game.".format(player = player_obj_dict[player].name))
+
+		#case 2: player wins automatically
+		elif(player_obj_dict[player].score == 21):
+			print("\n{player}, you have automatically won the game.".format(player = player_obj_dict[player].name))
+
+			#add bet to player balance
+			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+
+		#case 3: dealer busts, player wins
+		elif(dealer_points > 21):
+			print("\n{player}, the dealer has busted and you have not, so you have won.".format(player = player_obj_dict[player].name))
+
+			#add bet to player balance
+			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+
+		#case 4: player score > dealer score, player wins
+		elif(player_obj_dict[player].score > dealer_points):
+			print("\n{player}, your score is higher than the dealer's, so you have won.".format(player = player_obj_dict[player].name))
+
+			#add bet to player balance
+			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+
+		#final case: dealer score > player score, player loses
+		else:
+			print("\n{player}, the dealer's score is higher than yours, so you have lost.".format(player = player_obj_dict[player].name))
+
+		print("-------------------------------------------------------------------------------------")
+
+'''
+output player balances, remove players with no money left, ask if remaining players wish to play again
+'''
+
+
 #begin main program
 welcome()
 
@@ -478,3 +557,7 @@ dealer_cards = initial_deal(blackjack_deck, player_dict)
 hit_or_stand(blackjack_deck, player_dict)
 
 dealer_points = dealer_draws(dealer_cards, blackjack_deck)
+
+final_points(player_dict)
+
+win_or_loss(player_dict, dealer_points, bet_amounts)
