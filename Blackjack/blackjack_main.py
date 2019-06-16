@@ -137,7 +137,7 @@ def initial_deal(deck, player_obj_dict):
 		print("-------------------------------------------------------------------------------------")
 
 		#consider if player wishes to use ace as 11 points rather than 1 point
-		if(player_obj_dict[player].score == 11):
+		if(player_obj_dict[player].score == 11 and player_obj_dict[player].ace):
 			player_obj_dict[player].score += 10
 			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
 				.format(player = player_obj_dict[player].name, card1 = card1.name,\
@@ -533,31 +533,218 @@ def win_or_loss(player_obj_dict, dealer_points, bet_amts):
 '''
 output player balances, remove players with no money left, ask if remaining players wish to play again
 '''
+def new_values(player_obj_dict):
+	print("| Player Name | Player Balance |")
+	print("--------------------------------")
+
+	#print player name and balance
+	for player in player_obj_dict:
+
+		#count digits of player balance to have properly formatted table
+		count = 0
+		new_balance = player_obj_dict[player].balance
+
+		#check if balance is 0
+		if(new_balance == 0):
+			count = 1
+
+		else:
+			while(new_balance != 0):
+				new_balance = new_balance // 10
+				count += 1
+
+		player_length = len(player_obj_dict[player].name)
+		#check to see if player name is short enough to fit the table
+		if(player_length > 11):
+
+			#ensure proper alignment of table
+			print("| {player}.. |".format(player = player_obj_dict[player].name[:9]),\
+				"{balance}".format(balance = player_obj_dict[player].balance),\
+				" " * (13 - count), "|")
+
+		else:
+
+			#ensure proper alignment of table
+			print("| {player}".format(player = player_obj_dict[player].name),\
+				" " * (10 - player_length), "|", "{balance}".format(balance = player_obj_dict[player].balance),\
+				" " * (13 - count), "|")
+
+'''
+Asks player what they wish to do next
+Case 1: End Game
+Case 2: Reset Game (entire game resets)
+Case 3: Play again (players with $0 will be dropped)
+'''
+
+def now_what(player_obj_dict):
+
+	#create a sort of menu
+	print("What do you wish to do next? (3 options)\n")
+
+	print("1: End Game")
+	print("2: Reset Game (entire game resets)")
+	print("3: Play Again (players with $0 will be dropped)\n\n")
+
+	while(True):
+		
+		will_run = True
+		will_play = True
+
+		#continue to loop until a valid number between 1 and 3 is entered.
+		game_choice = input("Choose an option (must be a number between 1 and 3)\n\n")
+
+		if game_choice == "1" or game_choice == "2" \
+		or game_choice == "3":
+			game_choice = int(game_choice)
+
+		else:
+			print("Choice must be between 1 and 3. \n")
+			continue
+
+		if (game_choice == 1):
+
+			print("\n\nThank you for playing!")
+
+			will_run = False
+			will_play = False
+
+			break
+
+		elif(game_choice == 2):
+
+			y_or_n = input("You are wishing to reset the game. Are you sure? ('Y' for yes.  Any other key for no.)")
+
+			if(y_or_n.capitalize() == "Y"):
+				
+				break
+
+			else:
+				continue
+
+		else:
+
+			print("You are wishing to play again. All players with $0 will be unable to play.")
+			y_or_n = input("Are you sure? ('Y' for yes.  Any other key for no.)\n")
+
+			if(y_or_n.capitalize() == "Y"):
+
+				#check if any players have money left
+				all_are_zero = True
+
+				for player in player_obj_dict:
+
+					if player_obj_dict[player].balance == 0:
+						continue
+
+					else:
+						all_are_zero = False
+						break
+
+				if all_are_zero == True:
+					print("All players are out of money.  You are unable to play again.")
+					print("Please pick another option.")
+
+					continue
+				
+				#delete players from dict if players have $0
+				for player in list(player_obj_dict.keys()):
+
+					#check player balance
+					if(player_obj_dict[player].balance == 0):
+
+						print("{player} is being removed from the game.".format(player = player_obj_dict[player].name))
+
+						#delete players with a balance of $0
+						del player_obj_dict[player]
+						continue
+
+				will_run = False
+
+				break
+
+			else:
+				continue
+
+	run_list = [will_run, will_play]
+
+	return run_list
 
 
 #begin main program
-welcome()
 
-#create and shuffle deck
-blackjack_deck = blackjackClasses.Deck()
-blackjack_deck.build_deck()
-blackjack_deck.shuffle_deck()
+is_running = True
+is_playing = True
+running_list = []
 
+while(True):
 
-#create list of player object arguments
-player_instances = name_balance_assignment(how_many)
+	while(is_running):
+		welcome()
 
-#assign player arguments to each player object, store in a dictionary
-player_dict = player_dictionary(player_instances)
+		#create list of player object arguments
+		player_instances = name_balance_assignment(how_many)
 
-bet_amounts = let_us_bet(player_dict)
+		#assign player arguments to each player object, store in a dictionary
+		player_dict = player_dictionary(player_instances)
 
-dealer_cards = initial_deal(blackjack_deck, player_dict)
+		break
 
-hit_or_stand(blackjack_deck, player_dict)
+	while(is_playing):
 
-dealer_points = dealer_draws(dealer_cards, blackjack_deck)
+		#create and shuffle deck
+		blackjack_deck = blackjackClasses.Deck()
+		blackjack_deck.build_deck()
+		blackjack_deck.shuffle_deck()
 
-final_points(player_dict)
+		for player in player_dict:
 
-win_or_loss(player_dict, dealer_points, bet_amounts)
+			player_dict[player].hand = []
+			player_dict[player].score = 0
+			player_dict[player].ace = False
+
+		#ask for bets
+		bet_amounts = let_us_bet(player_dict)
+
+		#deal initial cards
+		dealer_cards = initial_deal(blackjack_deck, player_dict)
+
+		#ask players to hit or stand
+		hit_or_stand(blackjack_deck, player_dict)
+
+		#dealer draws until he reaches at least 17
+		dealer_points = dealer_draws(dealer_cards, blackjack_deck)
+
+		#calculate final points (including Aces)
+		final_points(player_dict)
+
+		#determine whether each player won or lost
+		win_or_loss(player_dict, dealer_points, bet_amounts)
+
+		#print player names and balances
+		new_values(player_dict)
+
+		#determine what player wishes to do next
+		running_list = now_what(player_dict)
+
+		break
+
+	#game will be ended
+	if(running_list[0] == False and running_list[1] == False):
+
+		break
+
+	#players with money left will play again
+	elif(running_list[0] == False and running_list[1] == True):
+
+		#print remaining players
+		print("After deleting players with $0, here are the remaining players:\n\n")
+		new_values(player_dict)
+		print("\n\nGood luck to these players as they play once more.\n")
+
+		#ensure remaining players are not welcomed once again...go directly to player bets
+		is_running = False
+		continue
+
+	#game will reset
+	else:
+		print("The game will now be reset.")
