@@ -9,106 +9,117 @@ Description: This script executes the gameplay of the BlackJack Game.
 #before anything else, import the modules from the blackjack_components package.
 from blackjack_components import blackjack_classes as blackjackClasses
 
+#allow time between each step using time.sleep() from python's time module
+from time import sleep
+
+
 #Welcome the users
 def welcome():
 
-	print("Hello, welcome to the virtual Blackjack game! Each player will start with a balance of $1000. Let us begin.")
+    print("Hello, welcome to the virtual Blackjack game! Each player will start with a balance of $1000. Let us begin.")
 
 
 #how many people are playing?
 def how_many():
 
-	while True:
+    while True:
 
-		#continue to loop until a valid number between 1 and 4 is entered.
-		number_of_players = input("How many players are there? Enter a number between 1 and 4. \n\n")
+        #continue to loop until a valid number between 1 and 4 is entered.
+        number_of_players = input("How many players are there? Enter a number between 1 and 4. ")
 
-		if number_of_players == "1" or number_of_players == "2" \
-		or number_of_players == "3" or number_of_players == "4":
-			number_of_players = int(number_of_players)
-			break
+        if number_of_players == "1" or number_of_players == "2" \
+        or number_of_players == "3" or number_of_players == "4":
+            number_of_players = int(number_of_players)
 
-		else:
-			print("Number of players must be between 1 and 4. \n")
-			continue
+            #output blank line
+            print()
 
-	return number_of_players
+            break
+
+        else:
+            print("Number of players must be between 1 and 4. \n")
+            continue
+
+    return number_of_players
 
 
 #puts all player's names and balances into a list
 def name_balance_assignment(number):
 
-	#declare list that will be returned
-	assigned_values = []
+    #declare list that will be returned
+    assigned_values = []
 
-	#ask for number of players
-	number_of_players = number()
+    #ask for number of players
+    number_of_players = number()
 
-	#for each player, add their name and balance to list
-	for player in range(number_of_players):
+    #for each player, add their name and balance to list
+    for player in range(number_of_players):
 
-		player_name = input("What is player " + str(player + 1) + "'s name?\t")
-		assigned_values.append(player_name)
-		assigned_values.append(1000)
+        player_name = input("What is player " + str(player + 1) + "'s name? ")
+        assigned_values.append(player_name)
+        assigned_values.append(1000)
 
-	#return desired list containing player instances
-	return assigned_values
+    #return desired list containing player instances
+    return assigned_values
 
 #creates a player class instance for each player for 1-4 players and stores in dict
 def player_dictionary (player_name_balance):
 
-	count = 1
-	player_dict = {}
+    count = 1
+    player_dict = {}
 
-	while(count <= len(player_name_balance) / 2):
+    while(count <= len(player_name_balance) / 2):
 
-		#convert count number to string
-		temp_string = str(count)
+        #convert count number to string
+        temp_string = str(count)
 
-		#assign each dict key with a player object as its value
-		player_dict['player' + temp_string] = \
-			blackjackClasses.Player(player_name_balance[count*2 - 2], player_name_balance[count*2 - 1])
+        #assign each dict key with a player object as its value
+        player_dict['player' + temp_string] = \
+            blackjackClasses.Player(player_name_balance[count*2 - 2], player_name_balance[count*2 - 1])
 
-	#increment count
-		count += 1
+    #increment count
+        count += 1
 
-	return player_dict
+    return player_dict
 
 #asks players for bets
-def let_us_bet (player_object_dictionary):
-	#create list of player bets in order to pay out correct amount at end of game
-	bet_list = []
+def let_us_bet (player_obj_dict):
+    #create list of player bets in order to pay out correct amount at end of game
+    bet_list = []
 
-	for player_number in player_object_dictionary:
+    for player in player_obj_dict:
 
-		#create var to ensure that player has bet an allowable amount
-		check_amt = player_object_dictionary[player_number].balance
+        #create var to ensure that player has bet an allowable amount
+        check_amt = player_obj_dict[player].balance
 
-		#ensure allowable bet has been placed
-		while (check_amt == player_object_dictionary[player_number].balance):
+        #ensure allowable bet has been placed
+        while (check_amt == player_obj_dict[player].balance):
 
-			#ask for bet
-			bet_amt = input("{player}, you have ${balance}, how much would you like to wager?\t"\
-						.format(player = player_object_dictionary[player_number].name,\
-						balance = player_object_dictionary[player_number].balance))
+            #ask for bet
+            bet_amt = input("{player}, you have ${balance}, how much would you like to wager? "\
+                        .format(player = player_obj_dict[player].name,\
+                        balance = player_obj_dict[player].balance))
 
-			#try to convert string to int, else ask for bet_amt again
-			try: 
-				bet_amt = int(bet_amt)
+            #try to convert string to int, else ask for bet_amt again
+            try: 
+                bet_amt = int(bet_amt)
 
-			except:
-				print("\nBet must be a whole number.")
-				continue
+            except:
+                print("\nBet must be a whole number.")
+                continue
 
-			#add bet_amt to bet_list and pass bet amt to player method, bet()
-			bet_list.append(bet_amt)
-			player_object_dictionary[player_number].bet(bet_amt)
+            #add bet_amt to bet_list and pass bet amt to player method, bet()
+            bet_list.append(bet_amt)
+            player_obj_dict[player].bet(bet_amt)
 
-	#declare what is next
+    #declare what is next
 
-	print("\n\n\n\nNow that all bets have been placed, we may begin the deal.")
+    print("\nNow that all bets have been placed, we may begin the deal.")
 
-	return bet_list
+    #pause one second before initial deal
+    sleep(1)
+
+    return bet_list
 
 
 """
@@ -117,60 +128,66 @@ initially deal two cards to player then to dealer.
 
 def initial_deal(deck, player_obj_dict):
 
-	#deal cards to player
-	for player in player_obj_dict:
+    #deal cards to player
+    for player in player_obj_dict:
 
-		card1 = deck.cards.pop();
-		card2 = deck.cards.pop();
+        card1 = deck.cards.pop();
+        card2 = deck.cards.pop();
 
-		player_obj_dict[player].hand.append(card1)
-		player_obj_dict[player].score += card1.value
+        player_obj_dict[player].hand.append(card1)
+        player_obj_dict[player].score += card1.value
 
-		player_obj_dict[player].hand.append(card2)
-		player_obj_dict[player].score += card2.value
+        player_obj_dict[player].hand.append(card2)
+        player_obj_dict[player].score += card2.value
 
-		#check if player drew an Ace
-		if(card1.number == 'Ace' or card2.number == 'Ace'):
-			player_obj_dict[player].ace = True
+        #check if player drew an Ace
+        if(card1.number == 'Ace' or card2.number == 'Ace'):
+            player_obj_dict[player].ace = True
 
-		#separate players by dashes
-		print("-------------------------------------------------------------------------------------")
+        #separate players by dashes
+        print("-------------------------------------------------------------------------------------")
 
-		#consider if player wishes to use ace as 11 points rather than 1 point
-		if(player_obj_dict[player].score == 11 and player_obj_dict[player].ace):
-			player_obj_dict[player].score += 10
-			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
-				.format(player = player_obj_dict[player].name, card1 = card1.name,\
-				card2 = card2.name, points = player_obj_dict[player].score))
-		
-		elif(player_obj_dict[player].ace):
-			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
-				.format(player = player_obj_dict[player].name, card1 = card1.name,\
-				card2 = card2.name, points = player_obj_dict[player].score))
+        #consider if player wishes to use ace as 11 points rather than 1 point
+        if(player_obj_dict[player].score == 11 and player_obj_dict[player].ace):
+            player_obj_dict[player].score += 10
+            print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
+                .format(player = player_obj_dict[player].name, card1 = card1.name,\
+                card2 = card2.name, points = player_obj_dict[player].score))
+        
+        elif(player_obj_dict[player].ace):
+            print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
+                .format(player = player_obj_dict[player].name, card1 = card1.name,\
+                card2 = card2.name, points = player_obj_dict[player].score))
 
-			print("(or {points_a} points if you wish to make your Ace worth 11 points)"\
-				.format(points_a = player_obj_dict[player].score + 10))
+            print("(or {points_a} points if you wish to make your Ace worth 11 points)"\
+                .format(points_a = player_obj_dict[player].score + 10))
 
-		else:
+        else:
 
-			print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
-				.format(player = player_obj_dict[player].name, card1 = card1.name,\
-				card2 = card2.name, points = player_obj_dict[player].score))
+            print("\n{player}, you drew:\n\n\t{card1}\n\t{card2}\n\nTotal Points: {points}"\
+                .format(player = player_obj_dict[player].name, card1 = card1.name,\
+                card2 = card2.name, points = player_obj_dict[player].score))
 
-		print("-------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------")
 
-	#return list of dealer's cards
-	dealer_cards = []
-	card1 = deck.cards.pop();
-	card2 = deck.cards.pop();
+        #pause one second between turns
+        sleep(1)
 
-	dealer_cards.append(card1)
-	dealer_cards.append(card2)
+    #return list of dealer's cards
+    dealer_cards = []
+    card1 = deck.cards.pop();
+    card2 = deck.cards.pop();
 
-	print("\nThe dealer's visible card is the {card}".format(card = card1.name))
-	print("-------------------------------------------------------------------------------------")
+    dealer_cards.append(card1)
+    dealer_cards.append(card2)
 
-	return dealer_cards
+    print("\nThe dealer's visible card is the {card}".format(card = card1.name))
+    print("-------------------------------------------------------------------------------------")
+
+    #pause one second before asking players to hit or stand
+    sleep(1)
+
+    return dealer_cards
 
 """
 Create function based on whether player wants to hit or stand
@@ -178,301 +195,406 @@ Create function based on whether player wants to hit or stand
 
 def hit_or_stand(deck, player_obj_dict):
 
-	#go through each player until each player wants to stand or goes over 21
-	for player in player_obj_dict:
+    #go through each player until each player wants to stand or goes over 21
+    for player in player_obj_dict:
 
-		#create boolean for as long as player wants to hit
-		is_hit = True;
+        #create boolean for as long as player wants to hit
+        is_hit = True;
 
-		#separate players by dashes
-		print("-------------------------------------------------------------------------------------\n")
+        #separate players by dashes
+        print("-------------------------------------------------------------------------------------\n")
 
-		#while player wants more cards and player value <= 21, loop
-		while(is_hit):
+        #while player wants more cards and player value <= 21, loop
+        while(is_hit):
 
-			#check bust
-			if(player_obj_dict[player].score > 21):
-				print("{player}, you have busted.".format(player = player_obj_dict[player].name))
-				break
+            #check bust
+            if(player_obj_dict[player].score > 21):
+                print("{player}, you have busted.".format(player = player_obj_dict[player].name))
+                break
 
-			if(player_obj_dict[player].score == 21):
-				print("{player}, you have automatically won!".format(player = player_obj_dict[player].name))
-				break
+            if(player_obj_dict[player].score == 21):
+                print("{player}, you have automatically won!".format(player = player_obj_dict[player].name))
+                break
 
-			#loop until valid answer is given
-			while(True):
+            #loop until valid answer is given
+            while(True):
 
-				#ask player for hit/stand
-				y_or_n = input("{player}, would you like to hit or stand? ('Y' for hit, 'N' for stand)\t"\
-							.format(player = player_obj_dict[player].name)).capitalize()
+                #ask player for hit/stand
+                y_or_n = input("{player}, would you like to hit or stand? ('Y' for hit, 'N' for stand) "\
+                            .format(player = player_obj_dict[player].name)).capitalize()
 
-				#check if valid answer is given
-				if(y_or_n != "Y" and y_or_n != "N"):
-					print("Invalid Choice! Try again!\n")
-					continue
+                #check if valid answer is given
+                if(y_or_n != "Y" and y_or_n != "N"):
+                    print("Invalid Choice! Try again!\n")
+                    continue
 
-				else:
-					break
+                else:
+                    break
 
-			#check if user said they wished to hit or not
-			if(y_or_n == "Y"):
-				card1 = deck.cards.pop();
+            #check if user said they wished to hit or not
+            if(y_or_n == "Y"):
+                card1 = deck.cards.pop();
 
-				#add card to hand and add value of card to player's point total
-				player_obj_dict[player].hand.append(card1)
-				player_obj_dict[player].score += card1.value
+                #add card to hand and add value of card to player's point total
+                player_obj_dict[player].hand.append(card1)
+                player_obj_dict[player].score += card1.value
 
-				#check if player drew an ace
-				if(card1.number == 'Ace'):
-					player_obj_dict[player].ace = True
+                #pause one second between cards drawn
+                sleep(1)
 
-				#consider if player wishes to use ace as 11 points rather than 1 point
-				if(player_obj_dict[player].ace and player_obj_dict[player].score + 10 < 21):
-					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
-						.format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
+                #check if player drew an ace
+                if(card1.number == 'Ace'):
+                    player_obj_dict[player].ace = True
 
-					print("(or {points_a} points if you wish to make your Ace worth 11 points)"\
-						.format(points_a = player_obj_dict[player].score + 10))
+                #consider if player wishes to use ace as 11 points rather than 1 point
+                if(player_obj_dict[player].ace and player_obj_dict[player].score + 10 < 21):
+                    print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
+                        .format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
 
-					continue
+                    print("(or {points_a} points if you wish to make your Ace worth 11 points)"\
+                        .format(points_a = player_obj_dict[player].score + 10))
 
-				elif(player_obj_dict[player].ace and player_obj_dict[player].score + 10 == 21):
+                    continue
 
-					#assign an ace as 11
-					player_obj_dict.score += 10
+                elif(player_obj_dict[player].ace and player_obj_dict[player].score + 10 == 21):
 
-					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
-						.format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
+                    #assign an ace as 11
+                    player_obj_dict.score += 10
 
-				else:
-					print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
-						.format(player = player_obj_dict[player].name,\
-						card1 = card1.name, points = player_obj_dict[player].score))
+                    print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
+                        .format(player = player_obj_dict[player].name, card1 = card1.name, points = player_obj_dict[player].score))
 
-					continue
+                else:
+                    print("\n{player}, you have drawn the {card1},\nwith a new point total of {points} points."\
+                        .format(player = player_obj_dict[player].name,\
+                        card1 = card1.name, points = player_obj_dict[player].score))
 
-			else:
-				is_hit = False
-			
-		print("-------------------------------------------------------------------------------------")	
+                    continue
 
+            else:
+                is_hit = False
+            
+        print("-------------------------------------------------------------------------------------")    
+
+        #pause one second between each player
+        sleep(1)
+
+    #output blank line
+    print()
 '''
 Allow dealer to draw until he exceeds 17 points
 '''
 
 def dealer_draws(deal_cards, deck):
 
-	dealer_points = deal_cards[0].value + deal_cards[1].value
-	has_ace = False
+    dealer_points = deal_cards[0].value + deal_cards[1].value
+    has_ace = False
 
-	#check if dealer cards contains an ace
-	for card in deal_cards:
-		if(card.number == 'Ace'):
-			has_ace = True
+    #check if dealer cards contains an ace
+    for card in deal_cards:
+        if(card.number == 'Ace'):
+            has_ace = True
 
-	#if dealer initial hand value is at least 17
-	if(dealer_points >= 17):
+    #if dealer initial hand value is at least 17
+    if(dealer_points >= 17):
 
-		#explain that dealer will stand because his hand value is at least 17
-		print("The dealer's initial cards are:\n{card1}\n{card2}\n"\
-			.format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
+        #explain that dealer will stand because his hand value is at least 17
+        print("The dealer's initial cards are:\n\n\t{card1}\n\t{card2}"\
+            .format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
 
-		print("-------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------")
 
-		print("The dealer has at least 17 points ({points_a} points to be exact)."\
-			.format(points_a = dealer_points))
-		print("And so, the dealer will stand with the cards he has.\n")
+        #pause one second before determining win or loss
+        sleep(1)
 
-		print("-------------------------------------------------------------------------------------")
+        #output blank line
+        print()
 
-		#return dealer points
-		return dealer_points
+        print("The dealer has at least 17 points ({points_a} points to be exact)."\
+            .format(points_a = dealer_points))
+        print("And so, the dealer will stand with the cards he has.")
 
-	#if dealer uses ace as 11 and hand value is at least 17
-	elif(has_ace and dealer_points + 10 >= 17):
+        print("-------------------------------------------------------------------------------------")
 
-		dealer_points += 10
-		#explain that dealer will stand because his hand value is at least 17
-		print("The dealer's initial cards are:\n{card1}\n{card2}\n"\
-			.format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
+        #pause one second before determining win or loss
+        sleep(1)
 
-		print("-------------------------------------------------------------------------------------")
+        #return dealer points
+        return dealer_points
 
-		print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
-			.format(points_a = dealer_points))
-		print("And so, the dealer will stand with the cards he has.\n")
+    #if dealer uses ace as 11 and hand value is at least 17
+    elif(has_ace and dealer_points + 10 >= 17):
 
-		print("-------------------------------------------------------------------------------------")
+        dealer_points += 10
 
-		#return dealer points
-		return dealer_points
+        #explain that dealer will stand because his hand value is at least 17
+        print("The dealer's initial cards are:\n\n\t{card1}\n\t{card2}"\
+            .format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
 
-	#if dealer has ace and hand value is less than 17
-	elif(has_ace and dealer_points + 10 < 17):
+        print("-------------------------------------------------------------------------------------")
 
-		#print initial cards and points
-		print("The dealer's initial cards are:\n{card1}\n{card2}\n"\
-			.format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
+        #pause one second before printing dealer's point value
+        sleep(1)
 
-		print("-------------------------------------------------------------------------------------")
+        #output blank line
+        print()
 
-		print("The dealer does not have at least 17 points (currently, {points_a} points to be exact)."\
-			.format(points_a = dealer_points + 10))
-		print("And so, the dealer will draw another card until he gets at least 17 points or he busts.\n")
+        print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
+            .format(points_a = dealer_points))
+        print("And so, the dealer will stand with the cards he has.")
 
-		print("-------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------")
 
-		#draw until dealer has at least 17 points
-		while(dealer_points < 17):
+        #pause one second before determining win or loss
+        sleep(1)
 
-			#draw card, add to dealer's hand, add worth of card to dealer's points
-			card1 = deck.cards.pop();
-			deal_cards.append(card1)
-			dealer_points += card1.value
+        #return dealer points
+        return dealer_points
 
-			#report to player's what dealer drew along with new point total
-			if(dealer_points + 10 >= 17 and dealer_points + 10 <= 21):
+    #if dealer has ace and hand value is less than 17
+    elif(has_ace and dealer_points + 10 < 17):
 
-				dealer_points += 10
+        #print initial cards and points
+        print("The dealer's initial cards are:\n\n\t{card1}\n\t{card2}"\
+            .format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
 
-				#explain that dealer will stand because his hand value has hit at least 17
-				print("The dealer drew the card:\n{card}\n"\
-					.format(card = card1.name))
+        print("-------------------------------------------------------------------------------------")
 
-				print("-------------------------------------------------------------------------------------")
+        #pause one second before determining win or loss
+        sleep(1)
 
-				print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
-					.format(points_a = dealer_points))
-				print("And so, the dealer will stand with the cards he has.\n")
+        #output blank line
+        print()
 
-				print("-------------------------------------------------------------------------------------")
+        print("The dealer does not have at least 17 points (currently, {points_a} points to be exact)."\
+            .format(points_a = dealer_points + 10))
+        print("And so, the dealer will draw another card until he gets at least 17 points or he busts.")
 
-				#return dealer points
-				return dealer_points
+        print("-------------------------------------------------------------------------------------")
 
-			elif(dealer_points >= 17):
+        #pause one second before new card is drawn
+        sleep(1)
 
-				if(dealer_points <= 21):
+        #draw until dealer has at least 17 points
+        while(dealer_points < 17):
 
-					#explain that dealer will stand because his hand value has hit at least 17
-					print("The dealer drew the card:\n{card}\n"\
-						.format(card = card1.name))
+            #output blank line
+            print()
 
-					print("-------------------------------------------------------------------------------------")
+            #draw card, add to dealer's hand, add worth of card to dealer's points
+            card1 = deck.cards.pop();
+            deal_cards.append(card1)
+            dealer_points += card1.value
 
-					print("The dealer has at least 17 points ({points_a} points to be exact)."\
-						.format(points_a = dealer_points))
-					print("And so, the dealer will stand with the cards he has.\n")
+            #report to player's what dealer drew along with new point total
+            if(dealer_points + 10 >= 17 and dealer_points + 10 <= 21):
 
-					print("-------------------------------------------------------------------------------------")
+                dealer_points += 10
 
-					#return dealer points
-					return dealer_points
+                #explain that dealer will stand because his hand value has hit at least 17
+                print("The dealer drew the card:\n{card}"\
+                    .format(card = card1.name))
 
-				else:
+                print("-------------------------------------------------------------------------------------")
 
-					#explain that dealer will stand because his hand value has hit at least 17
-					print("The dealer drew the card:\n{card}\n"\
-						.format(card = card1.name))
+                #pause one second before printing dealer's new point value
+                sleep(1)
 
-					print("-------------------------------------------------------------------------------------")
+                #output blank line
+                print()
 
-					print("The dealer has at least 17 points, but has exceeded 21 points ({points_a} points to be exact)."\
-						.format(points_a = dealer_points))
-					print("And so, the dealer has busted.\n")
+                print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
+                    .format(points_a = dealer_points))
+                print("And so, the dealer will stand with the cards he has.")
 
-					print("-------------------------------------------------------------------------------------")
+                print("-------------------------------------------------------------------------------------")
 
-					#return dealer points
-					return dealer_points
+                #pause one second before determining win or loss
+                sleep(1)
 
-			else:
-				continue
+                #return dealer points
+                return dealer_points
 
-	else:
+            elif(dealer_points >= 17):
 
-		#print initial cards and points
-		print("The dealer's initial cards are:\n{card1}\n{card2}\n"\
-			.format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
+                if(dealer_points <= 21):
 
-		print("-------------------------------------------------------------------------------------")
+                    #explain that dealer will stand because his hand value has hit at least 17
+                    print("The dealer drew the card:\n{card}"\
+                        .format(card = card1.name))
 
-		print("The dealer does not have at least 17 points (currently, {points_a} points to be exact)."\
-			.format(points_a = dealer_points))
-		print("And so, the dealer will draw another card until he gets at least 17 points or he busts.\n")
+                    print("-------------------------------------------------------------------------------------")
 
-		print("-------------------------------------------------------------------------------------")
+                    #pause one second before printing dealer's new point value
+                    sleep(1)
 
-		#draw until dealer has at least 17 points
-		while(dealer_points < 17):
+                    #output blank line
+                    print()
 
-			#draw card, add to dealer's hand, add worth of card to dealer's points
-			card1 = deck.cards.pop();
-			deal_cards.append(card1)
-			dealer_points += card1.value
+                    print("The dealer has at least 17 points ({points_a} points to be exact)."\
+                        .format(points_a = dealer_points))
+                    print("And so, the dealer will stand with the cards he has.")
 
-			#check if card is an ace
-			if(card1.name == 'Ace'):
-				has_ace = True
+                    print("-------------------------------------------------------------------------------------")
 
-			#report to player's what dealer drew along with new point total
-			if(has_ace and dealer_points + 10 >= 17 and dealer_points + 10 <= 21):
+                    #pause one second before determining win or loss
+                    sleep(1)
 
-				dealer_points += 10
+                    #return dealer points
+                    return dealer_points
 
-				#explain that dealer will stand because his hand value has hit at least 17
-				print("The dealer drew the card:\n{card}\n"\
-					.format(card = card1.name))
+                else:
 
-				print("-------------------------------------------------------------------------------------")
+                    #explain that dealer will stand because his hand value has hit at least 17
+                    print("The dealer drew the card:\n{card}"\
+                        .format(card = card1.name))
 
-				print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
-					.format(points_a = dealer_points))
-				print("And so, the dealer will stand with the cards he has.\n")
+                    print("-------------------------------------------------------------------------------------")
 
-				print("-------------------------------------------------------------------------------------")
+                    #pause one second before printing dealer's new point value
+                    sleep(1)
 
-				#return dealer points
-				return dealer_points
+                    #output blank line
+                    print()
 
-			elif(dealer_points >= 17):
+                    print("The dealer has at least 17 points, but has exceeded 21 points ({points_a} points to be exact)."\
+                        .format(points_a = dealer_points))
+                    print("And so, the dealer has busted.")
 
-				if(dealer_points <= 21):
+                    print("-------------------------------------------------------------------------------------")
 
-					#explain that dealer will stand because his hand value has hit at least 17
-					print("The dealer drew the card:\n{card}\n"\
-						.format(card = card1.name))
+                    #pause one second before determining win or loss
+                    sleep(1)
 
-					print("-------------------------------------------------------------------------------------")
+                    #return dealer points
+                    return dealer_points
 
-					print("The dealer has at least 17 points ({points_a} points to be exact)."\
-						.format(points_a = dealer_points))
-					print("And so, the dealer will stand with the cards he has.\n")
+            else:
+                continue
 
-					print("-------------------------------------------------------------------------------------")
+    else:
 
-					#return dealer points
-					return dealer_points
+        #print initial cards and points
+        print("The dealer's initial cards are:\n\n\t{card1}\n\t{card2}"\
+            .format(card1 = deal_cards[0].name, card2 = deal_cards[1].name))
 
-				else:
+        print("-------------------------------------------------------------------------------------")
 
-					#explain that dealer will stand because his hand value has hit at least 17
-					print("The dealer drew the card:\n{card}\n"\
-						.format(card = card1.name))
+        #pause one second before printing dealer's point value
+        sleep(1)
 
-					print("-------------------------------------------------------------------------------------")
+        #output blank line
+        print()
 
-					print("The dealer has at least 17 points, but has exceeded 21 points ({points_a} points to be exact)."\
-						.format(points_a = dealer_points))
-					print("And so, the dealer has busted.\n")
+        print("The dealer does not have at least 17 points (currently, {points_a} points to be exact)."\
+            .format(points_a = dealer_points))
+        print("And so, the dealer will draw another card until he gets at least 17 points or he busts.")
 
-					print("-------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------")
 
-					#return dealer points
-					return dealer_points
+        #pause one second before new card is drawn
+        sleep(1)
 
-			else:
-				continue
+        #draw until dealer has at least 17 points
+        while(dealer_points < 17):
+
+            #output blank line
+            print()
+
+            #draw card, add to dealer's hand, add worth of card to dealer's points
+            card1 = deck.cards.pop();
+            deal_cards.append(card1)
+            dealer_points += card1.value
+
+            #check if card is an ace
+            if(card1.name == 'Ace'):
+                has_ace = True
+
+            #report to player's what dealer drew along with new point total
+            if(has_ace and dealer_points + 10 >= 17 and dealer_points + 10 <= 21):
+
+                dealer_points += 10
+
+                #explain that dealer will stand because his hand value has hit at least 17
+                print("The dealer drew the card:\n{card}"\
+                    .format(card = card1.name))
+
+                print("-------------------------------------------------------------------------------------")
+
+                #pause one second before printing dealer's new point value
+                sleep(1)
+
+                #output blank line
+                print()
+
+                print("By using the Ace as 11 points, the dealer has at least 17 points ({points_a} points to be exact)."\
+                    .format(points_a = dealer_points))
+                print("And so, the dealer will stand with the cards he has.")
+
+                print("-------------------------------------------------------------------------------------")
+
+                #pause one second before determining win or loss
+                sleep(1)
+
+                #return dealer points
+                return dealer_points
+
+            elif(dealer_points >= 17):
+
+                if(dealer_points <= 21):
+
+                    #explain that dealer will stand because his hand value has hit at least 17
+                    print("The dealer drew the card:\n{card}"\
+                        .format(card = card1.name))
+
+                    print("-------------------------------------------------------------------------------------")
+
+                    #pause one second before printing dealer's new point value
+                    sleep(1)
+
+                    #output blank line
+                    print()
+
+                    print("The dealer has at least 17 points ({points_a} points to be exact)."\
+                        .format(points_a = dealer_points))
+                    print("And so, the dealer will stand with the cards he has.")
+
+                    print("-------------------------------------------------------------------------------------")
+
+                    #pause one second before determining win or loss
+                    sleep(1)
+
+                    #return dealer points
+                    return dealer_points
+
+                else:
+
+                    #explain that dealer will stand because his hand value has hit at least 17
+                    print("The dealer drew the card:\n{card}"\
+                        .format(card = card1.name))
+
+                    print("-------------------------------------------------------------------------------------")
+
+                    #pause one second before printing dealer's new point value
+                    sleep(1)
+
+                    #output blank line
+                    print()
+
+                    print("The dealer has at least 17 points, but has exceeded 21 points ({points_a} points to be exact)."\
+                        .format(points_a = dealer_points))
+                    print("And so, the dealer has busted.")
+
+                    print("-------------------------------------------------------------------------------------")
+
+                    #pause one second before determining win or loss
+                    sleep(1)
+
+                    #return dealer points
+                    return dealer_points
+
+            else:
+                continue
 
 '''
 calculate final player points
@@ -480,12 +602,12 @@ calculate final player points
 
 def final_points (player_obj_dict):
 
-	#cycle through players
-	for player in player_obj_dict:
+    #cycle through players
+    for player in player_obj_dict:
 
-		#check if player has ace
-		if(player_obj_dict[player].ace == True and player_obj_dict[player].score <= 11):
-			player_obj_dict[player].score += 10
+        #check if player has ace
+        if(player_obj_dict[player].ace and player_obj_dict[player].score <= 11):
+            player_obj_dict[player].score += 10
 
 '''
 determine winners and losers of the game and payout to winners
@@ -493,81 +615,94 @@ determine winners and losers of the game and payout to winners
 
 def win_or_loss(player_obj_dict, dealer_points, bet_amts):
 
-	#cycle through players
-	for player in player_obj_dict:
+    #cycle through players
+    for player in player_obj_dict:
 
-		#convert digit in player key to an index beginning at 0
-		bet_number = int(player[-1]) - 1
+        #convert digit in player key to an index beginning at 0
+        bet_number = int(player[-1]) - 1
 
-		#case 1: player busts, player loses
-		if(player_obj_dict[player].score > 21):
-			print("\n{player}, you have lost the game.".format(player = player_obj_dict[player].name))
+        #case 1: player busts, player loses
+        if(player_obj_dict[player].score > 21):
+            print("\n{player}, you have lost the game.".format(player = player_obj_dict[player].name))
 
-		#case 2: player wins automatically
-		elif(player_obj_dict[player].score == 21):
-			print("\n{player}, you have automatically won the game.".format(player = player_obj_dict[player].name))
+        #case 2: player wins automatically
+        elif(player_obj_dict[player].score == 21):
+            print("\n{player}, you have automatically won the game.".format(player = player_obj_dict[player].name))
 
-			#add bet to player balance
-			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+            #add bet to player balance
+            player_obj_dict[player].balance += (2 * bet_amts[bet_number])
 
-		#case 3: dealer busts, player wins
-		elif(dealer_points > 21):
-			print("\n{player}, the dealer has busted and you have not, so you have won.".format(player = player_obj_dict[player].name))
+        #case 3: dealer busts, player wins
+        elif(dealer_points > 21):
+            print("\n{player}, the dealer has busted and you have not, so you have won.".format(player = player_obj_dict[player].name))
 
-			#add bet to player balance
-			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+            #add bet to player balance
+            player_obj_dict[player].balance += (2 * bet_amts[bet_number])
 
-		#case 4: player score > dealer score, player wins
-		elif(player_obj_dict[player].score > dealer_points):
-			print("\n{player}, your score is higher than the dealer's, so you have won.".format(player = player_obj_dict[player].name))
+        #case 4: player score > dealer score, player wins
+        elif(player_obj_dict[player].score > dealer_points):
+            print("\n{player}, your score is higher than the dealer's, so you have won.".format(player = player_obj_dict[player].name))
 
-			#add bet to player balance
-			player_obj_dict[player].balance += (2 * bet_amts[bet_number])
+            #add bet to player balance
+            player_obj_dict[player].balance += (2 * bet_amts[bet_number])
 
-		#final case: dealer score > player score, player loses
-		else:
-			print("\n{player}, the dealer's score is higher than yours, so you have lost.".format(player = player_obj_dict[player].name))
+        #final case: dealer score > player score, player loses
+        else:
+            print("\n{player}, the dealer's score is higher than yours, so you have lost.".format(player = player_obj_dict[player].name))
 
-		print("-------------------------------------------------------------------------------------")
+        print("-------------------------------------------------------------------------------------")
+
+        #output blank line
+        print()
+
+        #pause one second between determining win or loss of each player
+        sleep(1)
 
 '''
 output player balances, remove players with no money left, ask if remaining players wish to play again
 '''
+
 def new_values(player_obj_dict):
-	print("| Player Name | Player Balance |")
-	print("--------------------------------")
+    print("| Player Name | Player Balance |")
+    print("--------------------------------")
 
-	#print player name and balance
-	for player in player_obj_dict:
+    #print player name and balance
+    for player in player_obj_dict:
 
-		#count digits of player balance to have properly formatted table
-		count = 0
-		new_balance = player_obj_dict[player].balance
+        #count digits of player balance to have properly formatted table
+        count = 0
+        new_balance = player_obj_dict[player].balance
 
-		#check if balance is 0
-		if(new_balance == 0):
-			count = 1
+        #check if balance is 0
+        if(new_balance == 0):
+            count = 1
 
-		else:
-			while(new_balance != 0):
-				new_balance = new_balance // 10
-				count += 1
+        else:
+            while(new_balance != 0):
+                new_balance = new_balance // 10
+                count += 1
 
-		player_length = len(player_obj_dict[player].name)
-		#check to see if player name is short enough to fit the table
-		if(player_length > 11):
+        player_length = len(player_obj_dict[player].name)
+        #check to see if player name is short enough to fit the table
+        if(player_length > 11):
 
-			#ensure proper alignment of table
-			print("| {player}.. |".format(player = player_obj_dict[player].name[:9]),\
-				"{balance}".format(balance = player_obj_dict[player].balance),\
-				" " * (13 - count), "|")
+            #ensure proper alignment of table
+            print("| {player}.. |".format(player = player_obj_dict[player].name[:9]),\
+                "{balance}".format(balance = player_obj_dict[player].balance),\
+                " " * (13 - count), "|")
 
-		else:
+        else:
 
-			#ensure proper alignment of table
-			print("| {player}".format(player = player_obj_dict[player].name),\
-				" " * (10 - player_length), "|", "{balance}".format(balance = player_obj_dict[player].balance),\
-				" " * (13 - count), "|")
+            #ensure proper alignment of table
+            print("| {player}".format(player = player_obj_dict[player].name),\
+                " " * (10 - player_length), "|", "{balance}".format(balance = player_obj_dict[player].balance),\
+                " " * (13 - count), "|")
+
+    #output blank line
+    print()
+
+    #pause one second before asking what player's wish to do next
+    sleep(1)
 
 '''
 Asks player what they wish to do next
@@ -578,96 +713,123 @@ Case 3: Play again (players with $0 will be dropped)
 
 def now_what(player_obj_dict):
 
-	#create a sort of menu
-	print("What do you wish to do next? (3 options)\n")
+    #create a sort of menu
+    print("What do you wish to do next? (3 options)\n")
 
-	print("1: End Game")
-	print("2: Reset Game (entire game resets)")
-	print("3: Play Again (players with $0 will be dropped)\n\n")
+    print("1: End Game")
+    print("2: Reset Game (entire game resets)")
+    print("3: Play Again (players with $0 will be dropped)\n")
 
-	while(True):
-		
-		will_run = True
-		will_play = True
+    while(True):
+        
+        will_run = True
+        will_play = True
 
-		#continue to loop until a valid number between 1 and 3 is entered.
-		game_choice = input("Choose an option (must be a number between 1 and 3)\n\n")
+        #continue to loop until a valid number between 1 and 3 is entered.
+        game_choice = input("Choose an option (must be a number between 1 and 3) ")
 
-		if game_choice == "1" or game_choice == "2" \
-		or game_choice == "3":
-			game_choice = int(game_choice)
+        if game_choice == "1" or game_choice == "2" \
+        or game_choice == "3":
+            game_choice = int(game_choice)
 
-		else:
-			print("Choice must be between 1 and 3. \n")
-			continue
+            #output blank line
+            print()
 
-		if (game_choice == 1):
+        else:
+            print("\n Choice must be between 1 and 3. \n")
+            continue
 
-			print("\n\nThank you for playing!")
+        if (game_choice == 1):
 
-			will_run = False
-			will_play = False
+            print("\n\nThank you for playing!")
 
-			break
+            will_run = False
+            will_play = False
 
-		elif(game_choice == 2):
+            break
 
-			y_or_n = input("You are wishing to reset the game. Are you sure? ('Y' for yes.  Any other key for no.)")
+        elif(game_choice == 2):
 
-			if(y_or_n.capitalize() == "Y"):
-				
-				break
+            #pause one second before ensuring players wish to continue with chosen option
+            sleep(1)
 
-			else:
-				continue
+            y_or_n = input("You are wishing to reset the game. Are you sure? ('Y' for yes.  Any other key for no.) ")
 
-		else:
+            #output blank line
+            print()
 
-			print("You are wishing to play again. All players with $0 will be unable to play.")
-			y_or_n = input("Are you sure? ('Y' for yes.  Any other key for no.)\n")
+            #pause one second before action is taken
+            sleep(1)
 
-			if(y_or_n.capitalize() == "Y"):
+            if(y_or_n.capitalize() == "Y"):
+                
+                break
 
-				#check if any players have money left
-				all_are_zero = True
+            else:
+                continue
 
-				for player in player_obj_dict:
+        else:
 
-					if player_obj_dict[player].balance == 0:
-						continue
+            #pause one second before ensuring players wish to continue with chosen option
+            sleep(1)
 
-					else:
-						all_are_zero = False
-						break
+            print("You are wishing to play again. All players with $0 will be unable to play.")
+            y_or_n = input("Are you sure? ('Y' for yes.  Any other key for no.) ")
 
-				if all_are_zero == True:
-					print("All players are out of money.  You are unable to play again.")
-					print("Please pick another option.")
+            #output blank line
+            print()
 
-					continue
-				
-				#delete players from dict if players have $0
-				for player in list(player_obj_dict.keys()):
+            #pause one second before action is taken
+            sleep(1)
 
-					#check player balance
-					if(player_obj_dict[player].balance == 0):
+            if(y_or_n.capitalize() == "Y"):
 
-						print("{player} is being removed from the game.".format(player = player_obj_dict[player].name))
+                #check if any players have money left
+                all_are_zero = True
 
-						#delete players with a balance of $0
-						del player_obj_dict[player]
-						continue
+                for player in player_obj_dict:
 
-				will_run = False
+                    if player_obj_dict[player].balance == 0:
+                        continue
 
-				break
+                    else:
+                        all_are_zero = False
+                        break
 
-			else:
-				continue
+                if (all_are_zero):
+                    print("All players are out of money.  You are unable to play again.")
+                    print("Please pick another option.")
 
-	run_list = [will_run, will_play]
+                    #pause one second before asking for new option
+                    sleep(1)
 
-	return run_list
+                    continue
+                
+                #delete players from dict if players have $0
+                for player in list(player_obj_dict.keys()):
+
+                    #check player balance
+                    if(player_obj_dict[player].balance == 0):
+
+                        print("{player} is being removed from the game...\n".format(player = player_obj_dict[player].name))
+
+                        #pause one second after each player is removed
+                        sleep(1)
+
+                        #delete players with a balance of $0
+                        del player_obj_dict[player]
+                        continue
+
+                will_run = False
+
+                break
+
+            else:
+                continue
+
+    run_list = [will_run, will_play]
+
+    return run_list
 
 
 #begin main program
@@ -675,76 +837,90 @@ def now_what(player_obj_dict):
 is_running = True
 is_playing = True
 running_list = []
+bet_amounts = []
+dealer_points = 0
 
 while(True):
 
-	while(is_running):
-		welcome()
+    while(is_running):
+        welcome()
 
-		#create list of player object arguments
-		player_instances = name_balance_assignment(how_many)
+        #create list of player object arguments
+        player_instances = name_balance_assignment(how_many)
 
-		#assign player arguments to each player object, store in a dictionary
-		player_dict = player_dictionary(player_instances)
+        #assign player arguments to each player object, store in a dictionary
+        player_dict = player_dictionary(player_instances)
 
-		break
+        break
 
-	while(is_playing):
+    while(is_playing):
 
-		#create and shuffle deck
-		blackjack_deck = blackjackClasses.Deck()
-		blackjack_deck.build_deck()
-		blackjack_deck.shuffle_deck()
+        #create and shuffle deck
+        blackjack_deck = blackjackClasses.Deck()
+        blackjack_deck.build_deck()
+        blackjack_deck.shuffle_deck()
 
-		for player in player_dict:
+        for player in player_dict:
 
-			player_dict[player].hand = []
-			player_dict[player].score = 0
-			player_dict[player].ace = False
+            player_dict[player].hand = []
+            player_dict[player].score = 0
+            player_dict[player].ace = False
 
-		#ask for bets
-		bet_amounts = let_us_bet(player_dict)
+        #ask for bets
+        bet_amounts = let_us_bet(player_dict)
 
-		#deal initial cards
-		dealer_cards = initial_deal(blackjack_deck, player_dict)
+        #deal initial cards
+        dealer_cards = initial_deal(blackjack_deck, player_dict)
 
-		#ask players to hit or stand
-		hit_or_stand(blackjack_deck, player_dict)
+        #ask players to hit or stand
+        hit_or_stand(blackjack_deck, player_dict)
 
-		#dealer draws until he reaches at least 17
-		dealer_points = dealer_draws(dealer_cards, blackjack_deck)
+        #dealer draws until he reaches at least 17
+        dealer_points = dealer_draws(dealer_cards, blackjack_deck)
 
-		#calculate final points (including Aces)
-		final_points(player_dict)
+        #calculate final points (including Aces)
+        final_points(player_dict)
 
-		#determine whether each player won or lost
-		win_or_loss(player_dict, dealer_points, bet_amounts)
+        #determine whether each player won or lost
+        win_or_loss(player_dict, dealer_points, bet_amounts)
 
-		#print player names and balances
-		new_values(player_dict)
+        #print player names and balances
+        new_values(player_dict)
 
-		#determine what player wishes to do next
-		running_list = now_what(player_dict)
+        #determine what player wishes to do next
+        running_list = now_what(player_dict)
 
-		break
+        break
 
-	#game will be ended
-	if(running_list[0] == False and running_list[1] == False):
+    #game will be ended
+    if(not running_list[0] and not running_list[1]):
 
-		break
+        break
 
-	#players with money left will play again
-	elif(running_list[0] == False and running_list[1] == True):
+    #players with money left will play again
+    elif(not running_list[0] and running_list[1]):
 
-		#print remaining players
-		print("After deleting players with $0, here are the remaining players:\n\n")
-		new_values(player_dict)
-		print("\n\nGood luck to these players as they play once more.\n")
+        #print remaining players
+        print("After deleting players with $0, here are the remaining players:\n\n")
+        new_values(player_dict)
+        print("\n\nGood luck to these players as they play once more.\n")
 
-		#ensure remaining players are not welcomed once again...go directly to player bets
-		is_running = False
-		continue
+        #clear bet amounts
+        bet_amounts.clear()
 
-	#game will reset
-	else:
-		print("The game will now be reset.")
+        #return dealer points to 0
+        dealer_points = 0
+
+
+        #ensure remaining players are not welcomed once again...go directly to player bets
+        is_running = False
+        continue
+
+    #game will reset
+    else:
+        print("The game will now be reset.")
+
+        #output blank line
+        print()
+
+        continue
